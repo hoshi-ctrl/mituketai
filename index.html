@@ -1,0 +1,60 @@
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+  import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+
+  // Firebaseの設定
+  const firebaseConfig = {
+    apiKey: "AIzaSyAF8rHeQhoEDy5FD4JtL6VF7DJY-FdSHQY",
+    authDomain: "maigo-3a43f.firebaseapp.com",
+    databaseURL: "https://maigo-3a43f-default-rtdb.firebaseio.com",
+    projectId: "maigo-3a43f",
+    storageBucket: "maigo-3a43f.firebasestorage.app",
+    messagingSenderId: "766647406550",
+    appId: "1:766647406550:web:d08040ed588f1226869e77",
+    measurementId: "G-80MPQGWZSE"
+  };
+
+  // Firebase初期化
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  // 地図の初期設定
+  const map = L.map('map').setView([35.682839, 139.759455], 13); // 東京
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // 現在地取得とFirebaseへの保存
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const userId = `user-${Date.now()}`;
+
+      // Firebaseに位置情報を保存
+      set(ref(database, 'locations/' + userId), {
+        userId,
+        lat,
+        lng,
+        timestamp: new Date().toISOString()
+      });
+    });
+  }
+
+  // Firebaseから位置情報を取得してマップに表示
+  const markers = {}; // ユーザーごとのマーカーを管理
+  onValue(ref(database, 'locations'), (snapshot) => {
+    const locations = snapshot.val();
+    for (const userId in locations) {
+      const { lat, lng } = locations[userId];
+      if (markers[userId]) {
+        // マーカーが既に存在する場合は位置を更新
+        markers[userId].setLatLng([lat, lng]);
+      } else {
+        // 新しいマーカーを追加
+        markers[userId] = L.marker([lat, lng]).addTo(map)
+          .bindPopup(`User: ${userId}`).openPopup();
+      }
+    }
+  });
+</script>
