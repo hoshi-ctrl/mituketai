@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>位置情報取得する何か</title>
+    <title>Track</title>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <h2>Live Location Tracking with Leaflet</h2>
+    <h2>Live Location</h2>
     <div id="map" style="height: 500px; width: 100%;"></div>
 
 
@@ -22,7 +22,7 @@
 //        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js';
 //        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js';
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
  
         // Firebaseの設定（GitHub Actionsで設定された環境変数から取得）
         const firebaseConfig = {
