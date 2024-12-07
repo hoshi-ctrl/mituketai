@@ -19,9 +19,11 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js';
-        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js';
-
+//        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js';
+//        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js';
+ 
         // Firebaseの設定（GitHub Actionsで設定された環境変数から取得）
         const firebaseConfig = {
             apiKey: "{{FIREBASE_API_KEY}}",
@@ -30,7 +32,8 @@
             projectId: "{{FIREBASE_PROJECT_ID}}",
             storageBucket: "{{FIREBASE_STORAGE_BUCKET}}",
             messagingSenderId: "{{FIREBASE_MESSAGING_SENDER_ID}}",
-            appId: "{{FIREBASE_APP_ID}}"
+            appId: "{{FIREBASE_APP_ID}}",
+            measurementId: "{{MESUREMENT_ID}}"
         };
 
         // Firebase初期化
