@@ -33,7 +33,7 @@ jobs:
         sed -i "s|{{FIREBASE_MESSAGING_SENDER_ID}}|$FIREBASE_MESSAGING_SENDER_ID|g" index.html
         sed -i "s|{{FIREBASE_APP_ID}}|$FIREBASE_APP_ID|g" index.html
     - name: Show updated index.html
-        run:cat index.html
+      run: cat index.html
     - name: Debug environment variables
       run: |
         echo "FIREBASE_API_KEY = $FIREBASE_API_KEY"
