@@ -1,76 +1,73 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realtime Location Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
-    <style>
-        #map { height: 500px; width: 100%; }
-    </style>
+    <title>Location Tracker</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
 </head>
 <body>
-    <h1>Realtime Location Map</h1>
-    <div id="map"></div>
+
+    <h2>Live Location Tracking</h2>
+    <div id="map" style="height: 500px; width: 100%;"></div>
 
     <script>
-        // Firebase設定
+        // Firebaseの設定（GitHub Actionsで設定された環境変数から取得）
         const firebaseConfig = {
-            apiKey: process.env.FIREBASE_API_KEY,  // GitHub Actionsで設定したFirebaseの環境変数を使用
-            authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-            databaseURL: process.env.FIREBASE_DATABASE_URL,
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-            messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-            appId: process.env.FIREBASE_APP_ID,
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+            databaseURL: "YOUR_FIREBASE_DATABASE_URL",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID"
         };
 
         // Firebase初期化
         const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const database = firebase.database(app);
 
-        // 地図の初期設定
-        const map = L.map('map').setView([35.682839, 139.759455], 13); // 東京
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        // 地図の初期化
+        let map;
+        let markers = {};
 
-        // 現在地取得とFirebaseへの保存
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                const userId = `user-${Date.now()}`;
-
-                // Firebaseに位置情報を保存
-                firebase.database().ref('locations/' + userId).set({
-                    userId,
-                    lat,
-                    lng,
-                    timestamp: new Date().toISOString()
-                });
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 10,
+                center: { lat: 35.6762, lng: 139.6503 }, // 初期地図の中心（例：東京）
             });
-        }
 
-        // Firebaseから位置情報を取得してマップに表示
-        const markers = {}; // ユーザーごとのマーカーを管理
-        firebase.database().ref('locations').on('value', (snapshot) => {
-            const locations = snapshot.val();
-            for (const userId in locations) {
-                const { lat, lng } = locations[userId];
+            // ユーザーの位置情報をFirebaseからリアルタイムで取得して表示
+            const locationsRef = database.ref('locations');
+            locationsRef.on('child_added', (snapshot) => {
+                const locationData = snapshot.val();
+                const userId = snapshot.key;
+                
                 if (markers[userId]) {
-                    // マーカーが既に存在する場合は位置を更新
-                    markers[userId].setLatLng([lat, lng]);
+                    markers[userId].setPosition(new google.maps.LatLng(locationData.lat, locationData.lng));
                 } else {
-                    // 新しいマーカーを追加
-                    markers[userId] = L.marker([lat, lng]).addTo(map)
-                        .bindPopup(`User: ${userId}`).openPopup();
+                    markers[userId] = new google.maps.Marker({
+                        position: new google.maps.LatLng(locationData.lat, locationData.lng),
+                        map: map,
+                        title: userId
+                    });
                 }
+            });
+
+            // ユーザー位置をデータベースに送信する（位置を更新する）
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    const userRef = database.ref('locations').child('user1'); // user1は一意のユーザーID
+                    userRef.set({ lat, lng });
+                });
             }
-        });
+        }
     </script>
+
 </body>
 </html>
