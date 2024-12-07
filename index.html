@@ -8,10 +8,6 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js"></script>
-
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
@@ -20,7 +16,12 @@
     <h2>Live Location Tracking with Leaflet</h2>
     <div id="map" style="height: 500px; width: 100%;"></div>
 
-    <script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js';
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js';
+
         // Firebaseの設定（GitHub Actionsで設定された環境変数から取得）
         const firebaseConfig = {
             apiKey: "{{FIREBASE_API_KEY}}",
