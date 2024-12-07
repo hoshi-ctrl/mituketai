@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Tracker</title>
+    <title>Location Tracker with Leaflet</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
 
-    <h2>Live Location Tracking</h2>
+    <h2>Live Location Tracking with Leaflet</h2>
     <div id="map" style="height: 500px; width: 100%;"></div>
 
     <script>
@@ -30,42 +37,43 @@
         const database = firebase.database(app);
 
         // 地図の初期化
-        let map;
+        const map = L.map('map').setView([35.6762, 139.6503], 10); // 東京を初期表示
+
+        // 地図のタイルレイヤーを設定（OpenStreetMap）
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // ユーザーの位置をリアルタイムで表示するためのマーカー
         let markers = {};
 
-        function initMap() {
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 10,
-                center: { lat: 35.6762, lng: 139.6503 }, // 初期地図の中心（例：東京）
-            });
+        // Firebaseから位置情報を取得して地図に表示
+        const locationsRef = database.ref('locations');
+        locationsRef.on('child_added', (snapshot) => {
+            const locationData = snapshot.val();
+            const userId = snapshot.key;
 
-            // ユーザーの位置情報をFirebaseからリアルタイムで取得して表示
-            const locationsRef = database.ref('locations');
-            locationsRef.on('child_added', (snapshot) => {
-                const locationData = snapshot.val();
-                const userId = snapshot.key;
-                
-                if (markers[userId]) {
-                    markers[userId].setPosition(new google.maps.LatLng(locationData.lat, locationData.lng));
-                } else {
-                    markers[userId] = new google.maps.Marker({
-                        position: new google.maps.LatLng(locationData.lat, locationData.lng),
-                        map: map,
-                        title: userId
-                    });
-                }
-            });
-
-            // ユーザー位置をデータベースに送信する（位置を更新する）
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-
-                    const userRef = database.ref('locations').child('user1'); // user1は一意のユーザーID
-                    userRef.set({ lat, lng });
-                });
+            // マーカーが既にあれば位置を更新、なければ新規にマーカーを追加
+            if (markers[userId]) {
+                markers[userId].setLatLng([locationData.lat, locationData.lng]);
+            } else {
+                markers[userId] = L.marker([locationData.lat, locationData.lng])
+                    .addTo(map)
+                    .bindPopup(`<b>User: ${userId}</b>`)
+                    .openPopup();
             }
+        });
+
+        // ユーザーの位置を取得し、Firebaseに保存
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // 現在位置をデータベースに保存（ユーザーIDはuser1として仮定）
+                const userRef = database.ref('locations').child('user1'); // user1は一意のユーザーID
+                userRef.set({ lat, lng });
+            });
         }
     </script>
 
