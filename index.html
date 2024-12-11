@@ -80,27 +80,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        .find-me {
-            position: absolute;
-            top: 200%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ff0000;
-            font-size: 3rem;
-            font-family: 'Courier New', Courier, monospace;
-            opacity: 0;
-            transition: opacity 2s ease-in-out, top 2s ease-in-out;
-        }
-
-        .find-me.visible {
-            top: 50%;
-            opacity: 1;
-        }
-
-        .find-me.hidden {
-            opacity: 0;
-        }
-
         .glitch {
             display: inline-block;
             animation: glitch 1.5s steps(3, end) infinite;
@@ -115,7 +94,6 @@
             50% { transform: translate(-2px, 2px); }
             75% { transform: translate(2px, 2px); }
         }
-
     </style>
 </head>
 <body>
@@ -129,18 +107,15 @@
     <button id="pasteLocation">情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
     <button id="openMap">地図を開く</button>
-    <div class="find-me" id="findMe">みつけた...</div>
 
     <script>
         const getLocationButton = document.getElementById('getLocation');
         const title = document.getElementById('title');
-        const header = document.getElementById('header');
         const locationDisplay = document.getElementById('locationDisplay');
         const copyLocationButton = document.getElementById('copyLocation');
         const pasteLocationButton = document.getElementById('pasteLocation');
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
-        const findMe = document.getElementById('findMe');
 
         let currentLocation = '';
 
@@ -161,15 +136,6 @@
             title.textContent = getRandomString();
             document.querySelector('button').textContent = getRandomString();
 
-            // UIを一時的に非表示
-            header.style.display = 'none';
-            getLocationButton.style.display = 'none';
-            locationDisplay.style.display = 'none';
-            copyLocationButton.style.display = 'none';
-            pasteLocationButton.style.display = 'none';
-            locationInput.style.display = 'none';
-            openMapButton.style.display = 'none';
-
             // 文字化け後、位置情報取得
             setTimeout(() => {
                 navigator.geolocation.getCurrentPosition(
@@ -178,30 +144,14 @@
                         const longitude = position.coords.longitude;
                         currentLocation = `${latitude},${longitude}`;
                         locationDisplay.value = currentLocation;
-
-                        // スクロールし、「みつけた」を表示
-                        window.scrollTo(0, document.body.scrollHeight);
-                        findMe.classList.add('visible');
-
-                        // 一定時間後に元に戻す
-                        setTimeout(() => {
-                            findMe.classList.remove('visible');
-                            window.scrollTo(0, 0);  // ページを元に戻す
-                            title.textContent = '位置情報簡易設定ツール'; // 元の文字に戻す
-                            header.style.display = 'block';
-                            getLocationButton.style.display = 'inline-block';
-                            locationDisplay.style.display = 'inline-block';
-                            copyLocationButton.style.display = 'inline-block';
-                            pasteLocationButton.style.display = 'inline-block';
-                            locationInput.style.display = 'inline-block';
-                            openMapButton.style.display = 'inline-block';
-                        }, 3000);
+                        // 元のタイトルに戻す
+                        title.textContent = '位置情報簡易設定ツール'; 
                     },
                     (error) => {
                         locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
                     }
                 );
-            }, 1000);
+            }, 1000); // 1秒後に位置情報取得
         });
 
         // 位置情報をコピー
