@@ -63,10 +63,10 @@
         <p>現在の位置を取得して共有しよう</p>
     </header>
     <button id="getLocation">現在地を取得</button>
+    <input type="text" id="locationDisplay" class="output" placeholder="現在地がここに表示されます" readonly>
     <button id="pasteLocation">位置情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
     <button id="openMap">Google Mapsで開く</button>
-    <div id="locationDisplay" class="output"></div>
 
     <script>
         const getLocationButton = document.getElementById('getLocation');
@@ -83,10 +83,10 @@
                     const longitude = position.coords.longitude;
                     const currentLocation = `${latitude},${longitude}`;
                     locationInput.value = currentLocation;
-                    locationDisplay.textContent = `現在地: 緯度 ${latitude}, 経度 ${longitude}`;
+                    locationDisplay.value = `緯度: ${latitude}, 経度: ${longitude}`;
                 },
                 (error) => {
-                    locationDisplay.textContent = `位置情報の取得に失敗しました: ${error.message}`;
+                    locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
                 }
             );
         });
