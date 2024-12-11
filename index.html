@@ -2,115 +2,118 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>位置情報共有</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>位置情報共有サイト</title>
+    <script defer src="script.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        header {
             text-align: center;
+            margin-bottom: 20px;
         }
-        button {
+
+        input, button {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 16px;
-            padding: 10px 20px;
-            margin: 10px;
         }
-        textarea {
-            width: 100%;
-            height: 100px;
-            margin-bottom: 10px;
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
-        input {
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 5px;
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .output {
+            margin-top: 10px;
+            word-wrap: break-word;
+            font-size: 14px;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            input, button {
+                width: 90%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>位置情報共有</h1>
-
-    <div id="getLocationSection">
-        <h2>自分の位置情報</h2>
-        <button onclick="getLocation()">現在地を取得</button>
-        <textarea id="locationDisplay" readonly placeholder="位置情報が表示されます"></textarea>
-        <button onclick="copyLocation()">位置情報をコピー</button>
-    </div>
-
-    <div id="openMapSection">
-        <h2>位置情報を開く</h2>
-        <input type="text" id="pasteLocation" placeholder="位置情報を貼り付け">
-        <button onclick="openMapFromInput()">Googleマップで開く</button>
-    </div>
+    <header>
+        <h1>位置情報共有ツール</h1>
+        <p>現在の位置を取得して共有しましょう</p>
+    </header>
+    <button id="getLocation">現在地を取得</button>
+    <div class="output" id="locationOutput"></div>
+    <button id="copyLocation" disabled>リンクをコピー</button>
+    <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
+    <button id="openMap">Google Mapsで開く</button>
 
     <script>
-        function getLocation() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        
-                        // 位置情報を整形して表示
-                        const locationText = `緯度: ${latitude}, 経度: ${longitude}
-Google Maps URL: https://www.google.com/maps?q=${latitude},${longitude}`;
-                        
-                        document.getElementById('locationDisplay').value = locationText;
-                    },
-                    function(error) {
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                alert("位置情報の利用が許可されていません");
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                alert("位置情報を取得できません");
-                                break;
-                            case error.TIMEOUT:
-                                alert("位置情報の取得がタイムアウトしました");
-                                break;
-                            default:
-                                alert("不明なエラーが発生しました");
-                        }
-                    }
-                );
-            } else {
-                alert("このブラウザは位置情報に対応していません");
-            }
-        }
+        const getLocationButton = document.getElementById('getLocation');
+        const copyLocationButton = document.getElementById('copyLocation');
+        const locationOutput = document.getElementById('locationOutput');
+        const locationInput = document.getElementById('locationInput');
+        const openMapButton = document.getElementById('openMap');
 
-        function copyLocation() {
-            const locationDisplay = document.getElementById('locationDisplay');
-            locationDisplay.select();
-            document.execCommand('copy');
-            alert('位置情報をコピーしました');
-        }
+        let currentLocationLink = '';
 
-        function openMapFromInput() {
-            const pastedLocation = document.getElementById('pasteLocation').value;
-            
-            // 緯度と経度を抽出する正規表現
-            const latMatch = pastedLocation.match(/緯度:\s*([-\d.]+)/);
-            const lngMatch = pastedLocation.match(/経度:\s*([-\d.]+)/);
-
-            if (latMatch && lngMatch) {
-                const latitude = latMatch[1];
-                const longitude = lngMatch[1];
-                
-                // Googleマップを新しいタブで開く
-                const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-                window.open(googleMapsUrl, '_blank');
-            } else {
-                // URLを直接チェック
-                const urlMatch = pastedLocation.match(/https:\/\/www\.google\.com\/maps\?q=([-\d.]+),([-\d.]+)/);
-                
-                if (urlMatch) {
-                    window.open(pastedLocation, '_blank');
-                } else {
-                    alert('有効な位置情報形式ではありません');
+        // 現在地を取得
+        getLocationButton.addEventListener('click', () => {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    currentLocationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                    locationOutput.textContent = `位置情報リンク: ${currentLocationLink}`;
+                    copyLocationButton.disabled = false;
+                },
+                (error) => {
+                    locationOutput.textContent = `位置情報の取得に失敗しました: ${error.message}`;
                 }
+            );
+        });
+
+        // リンクをコピー
+        copyLocationButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(currentLocationLink)
+                .then(() => {
+                    alert('位置情報リンクをコピーしました！');
+                })
+                .catch((err) => {
+                    alert('コピーに失敗しました: ' + err);
+                });
+        });
+
+        // Google Mapsで開く
+        openMapButton.addEventListener('click', () => {
+            const input = locationInput.value.trim();
+            if (input) {
+                const url = `https://www.google.com/maps?q=${input}`;
+                window.open(url, '_blank');
+            } else {
+                alert('有効な緯度と経度を入力してください');
             }
-        }
+        });
     </script>
 </body>
 </html>
