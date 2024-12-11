@@ -95,7 +95,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -114,6 +114,18 @@
             pointer-events: all;
         }
 
+        .overlay.glitch {
+            animation: glitch 0.3s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(2px, 2px); }
+            25% { transform: translate(-2px, -2px); }
+            50% { transform: translate(2px, -2px); }
+            75% { transform: translate(-2px, 2px); }
+            100% { transform: translate(0, 0); }
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -122,6 +134,25 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .corrupted-text {
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            opacity: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: corruptedText 5s linear forwards;
+        }
+
+        @keyframes corruptedText {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 1; }
         }
 
         @media (max-width: 600px) {
@@ -134,26 +165,27 @@
 <body>
     <header>
         <h1>位置情報簡易設定ツール</h1>
-        <p>位置情報取得or地図にPIN刺し</p>
+        <p>操作が楽しくなる位置情報ツール</p>
     </header>
     <div class="loader" id="loader"></div>
-    <div class="overlay" id="overlay">幽霊が近づいています...</div>
+    <div class="overlay" id="overlay">見つけた...</div>
+    <div class="corrupted-text" id="corruptedText"></div>
     <button id="getLocation">現在地をチェック</button>
     <input type="text" id="locationDisplay" class="output" placeholder="現在地がここに表示されます" readonly>
     <button id="copyLocation">位置情報をコピー</button>
     <button id="pasteLocation">情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
     <button id="openMap">地図を開く</button>
-
     <script>
+        const loader = document.getElementById('loader');
+        const overlay = document.getElementById('overlay');
+        const corruptedText = document.getElementById('corruptedText');
         const getLocationButton = document.getElementById('getLocation');
         const copyLocationButton = document.getElementById('copyLocation');
         const pasteLocationButton = document.getElementById('pasteLocation');
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
         const locationDisplay = document.getElementById('locationDisplay');
-        const loader = document.getElementById('loader');
-        const overlay = document.getElementById('overlay');
 
         let currentLocation = '';
 
@@ -165,16 +197,23 @@
             loader.style.display = 'none';
         }
 
-        function showOverlay() {
+        function showOverlay(message, glitch = false) {
+            overlay.textContent = message;
             overlay.classList.add('visible');
+            if (glitch) {
+                overlay.classList.add('glitch');
+            }
             setTimeout(() => {
-                overlay.classList.remove('visible');
-            }, 2000);
+                overlay.classList.remove('visible', 'glitch');
+            }, 3000);
+        }
+
+        function showCorruptedText() {
+            corruptedText.textContent = Array(500).fill('?? ?? ? ').join('');
         }
 
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
-            locationDisplay.value = '';
             showLoader();
             setTimeout(() => {
                 navigator.geolocation.getCurrentPosition(
@@ -184,11 +223,12 @@
                         currentLocation = `${latitude},${longitude}`;
                         locationDisplay.value = `${latitude},${longitude}`;
                         hideLoader();
-                        showOverlay();
+                        showOverlay('位置情報を取得しました');
                     },
                     (error) => {
-                        locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
                         hideLoader();
+                        showOverlay('エラー: ' + error.message, true);
+                        showCorruptedText();
                     }
                 );
             }, 500);
@@ -199,26 +239,27 @@
             if (currentLocation) {
                 try {
                     await navigator.clipboard.writeText(currentLocation);
-                    alert('位置情報をコピーしました！');
+                    showOverlay('位置情報をコピーしました！');
                 } catch (error) {
-                    alert('コピーに失敗しました: ' + error.message);
+                    showOverlay('コピー失敗: ' + error.message, true);
                 }
             } else {
-                alert('位置情報が取得されていません！');
+                showOverlay('位置情報を取得していません', true);
             }
         });
 
-        // ペーストボタン
+        // 情報をペースト
         pasteLocationButton.addEventListener('click', async () => {
             try {
                 const text = await navigator.clipboard.readText();
                 locationInput.value = text;
+                showOverlay('クリップボードからペーストしました');
             } catch (error) {
-                alert('クリップボードからペーストできませんでした: ' + error.message);
+                showOverlay('ペースト失敗: ' + error.message, true);
             }
         });
 
-        // Google Mapsで開く
+        // 地図を開く
         openMapButton.addEventListener('click', () => {
             const input = locationInput.value.trim();
             if (input) {
@@ -227,10 +268,10 @@
                     const url = `https://www.google.com/maps?q=${input}`;
                     window.open(url, '_blank');
                     hideLoader();
-                    showOverlay();
+                    showOverlay('地図を開きました');
                 }, 500);
             } else {
-                alert('有効な緯度と経度を入力してください');
+                showOverlay('有効な緯度と経度を入力してください', true);
             }
         });
     </script>
