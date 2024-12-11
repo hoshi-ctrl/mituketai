@@ -66,12 +66,14 @@
     <button id="pasteLocation">位置情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
     <button id="openMap">Google Mapsで開く</button>
+    <div id="locationDisplay" class="output"></div>
 
     <script>
         const getLocationButton = document.getElementById('getLocation');
         const pasteLocationButton = document.getElementById('pasteLocation');
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
+        const locationDisplay = document.getElementById('locationDisplay');
 
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
@@ -80,11 +82,11 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     const currentLocation = `${latitude},${longitude}`;
-                    alert('現在地を取得しました！');
                     locationInput.value = currentLocation;
+                    locationDisplay.textContent = `現在地: 緯度 ${latitude}, 経度 ${longitude}`;
                 },
                 (error) => {
-                    alert(`位置情報の取得に失敗しました: ${error.message}`);
+                    locationDisplay.textContent = `位置情報の取得に失敗しました: ${error.message}`;
                 }
             );
         });
