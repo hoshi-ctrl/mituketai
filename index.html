@@ -76,6 +76,22 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -93,6 +109,7 @@
         <h1>位置情報簡易設定ツール</h1>
         <p>操作が楽しくなる位置情報ツール</p>
     </header>
+    <div class="loader" id="loader"></div>
     <button id="getLocation">現在地をチェック</button>
     <input type="text" id="locationDisplay" class="output" placeholder="現在地がここに表示されます" readonly>
     <button id="copyLocation">位置情報をコピー</button>
@@ -107,23 +124,37 @@
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
         const locationDisplay = document.getElementById('locationDisplay');
+        const loader = document.getElementById('loader');
 
         let currentLocation = '';
 
+        function showLoader() {
+            loader.style.display = 'block';
+        }
+
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
-            locationDisplay.value = '取得中...';
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    currentLocation = `${latitude},${longitude}`;
-                    locationDisplay.value = `${latitude},${longitude}`;
-                },
-                (error) => {
-                    locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
-                }
-            );
+            locationDisplay.value = '';
+            showLoader();
+            setTimeout(() => {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        currentLocation = `${latitude},${longitude}`;
+                        locationDisplay.value = `${latitude},${longitude}`;
+                        hideLoader();
+                    },
+                    (error) => {
+                        locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
+                        hideLoader();
+                    }
+                );
+            }, 500);
         });
 
         // 現在地をコピー
@@ -154,8 +185,12 @@
         openMapButton.addEventListener('click', () => {
             const input = locationInput.value.trim();
             if (input) {
-                const url = `https://www.google.com/maps?q=${input}`;
-                window.open(url, '_blank');
+                showLoader();
+                setTimeout(() => {
+                    const url = `https://www.google.com/maps?q=${input}`;
+                    window.open(url, '_blank');
+                    hideLoader();
+                }, 500);
             } else {
                 alert('有効な緯度と経度を入力してください');
             }
