@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>位置情報共有サイト</title>
+    <title>位置情報共有</title>
     <script defer src="script.js"></script>
     <style>
         body {
@@ -60,22 +60,20 @@
 <body>
     <header>
         <h1>位置情報共有ツール</h1>
-        <p>現在の位置を取得して共有しましょう</p>
+        <p>現在の位置を取得して共有しよう</p>
     </header>
     <button id="getLocation">現在地を取得</button>
-    <div class="output" id="locationOutput"></div>
-    <button id="copyLocation" disabled>リンクをコピー</button>
+    <button id="pasteLocation">位置情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
     <button id="openMap">Google Mapsで開く</button>
 
     <script>
         const getLocationButton = document.getElementById('getLocation');
-        const copyLocationButton = document.getElementById('copyLocation');
-        const locationOutput = document.getElementById('locationOutput');
+        const pasteLocationButton = document.getElementById('pasteLocation');
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
 
-        let currentLocationLink = '';
+        let currentLocation = '';
 
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
@@ -83,25 +81,22 @@
                 (position) => {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    currentLocationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
-                    locationOutput.textContent = `位置情報リンク: ${currentLocationLink}`;
-                    copyLocationButton.disabled = false;
+                    currentLocation = `${latitude},${longitude}`;
+                    alert('現在地を取得しました！');
                 },
                 (error) => {
-                    locationOutput.textContent = `位置情報の取得に失敗しました: ${error.message}`;
+                    alert(`位置情報の取得に失敗しました: ${error.message}`);
                 }
             );
         });
 
-        // リンクをコピー
-        copyLocationButton.addEventListener('click', () => {
-            navigator.clipboard.writeText(currentLocationLink)
-                .then(() => {
-                    alert('位置情報リンクをコピーしました！');
-                })
-                .catch((err) => {
-                    alert('コピーに失敗しました: ' + err);
-                });
+        // ペーストボタン
+        pasteLocationButton.addEventListener('click', () => {
+            if (currentLocation) {
+                locationInput.value = currentLocation;
+            } else {
+                alert('現在地を先に取得してください！');
+            }
         });
 
         // Google Mapsで開く
