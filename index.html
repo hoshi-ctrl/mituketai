@@ -64,12 +64,14 @@
     </header>
     <button id="getLocation">現在地を取得</button>
     <input type="text" id="locationDisplay" class="output" placeholder="現在地がここに表示されます" readonly>
+    <button id="copyLocation">現在地をコピー</button>
     <button id="pasteLocation">位置情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
     <button id="openMap">Google Mapsで開く</button>
 
     <script>
         const getLocationButton = document.getElementById('getLocation');
+        const copyLocationButton = document.getElementById('copyLocation');
         const pasteLocationButton = document.getElementById('pasteLocation');
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
@@ -89,6 +91,21 @@
                     locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
                 }
             );
+        });
+
+        // 現在地をコピー
+        copyLocationButton.addEventListener('click', async () => {
+            try {
+                const text = locationDisplay.value;
+                if (text) {
+                    await navigator.clipboard.writeText(text);
+                    alert('現在地をコピーしました');
+                } else {
+                    alert('現在地が取得されていません');
+                }
+            } catch (error) {
+                alert('コピーに失敗しました: ' + error.message);
+            }
         });
 
         // ペーストボタン
