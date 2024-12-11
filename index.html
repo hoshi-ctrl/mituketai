@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>位置情報簡易設定ツール</title>
-    <script defer src="script.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -15,39 +14,65 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f8f9fa;
+            background: linear-gradient(to bottom right, #87CEFA, #FFB6C1);
+            color: #333;
         }
 
         header {
             text-align: center;
             margin-bottom: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
         input, button {
             width: 80%;
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: none;
+            border-radius: 10px;
             font-size: 16px;
+            transition: transform 0.2s, background-color 0.3s;
         }
 
         button {
-            background-color: #007bff;
-            color: white;
-            border: none;
+            background-color: #FFD700;
+            color: #333;
             cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #FFA500;
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        input {
+            background-color: #fff;
+            border: 2px solid #ddd;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .output {
             margin-top: 10px;
             word-wrap: break-word;
             font-size: 14px;
-            color: #333;
+            color: #555;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 600px) {
@@ -60,14 +85,14 @@
 <body>
     <header>
         <h1>位置情報簡易設定ツール</h1>
-        <p>現在の位置を取得or位置情報から地図PIN刺し</p>
+        <p>操作が楽しくなる位置情報ツール</p>
     </header>
-    <button id="getLocation">現在地を取得</button>
+    <button id="getLocation">現在地をチェック</button>
     <input type="text" id="locationDisplay" class="output" placeholder="現在地がここに表示されます" readonly>
-    <button id="copyLocation">現在地をコピー</button>
-    <button id="pasteLocation">位置情報をペースト</button>
+    <button id="copyLocation">位置情報をコピー</button>
+    <button id="pasteLocation">情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
-    <button id="openMap">Google Mapsで開く</button>
+    <button id="openMap">地図を開く</button>
 
     <script>
         const getLocationButton = document.getElementById('getLocation');
@@ -81,6 +106,7 @@
 
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
+            locationDisplay.value = '取得中...';
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const latitude = position.coords.latitude;
@@ -99,12 +125,12 @@
             if (currentLocation) {
                 try {
                     await navigator.clipboard.writeText(currentLocation);
-                    alert('現在地をコピーしました！');
+                    alert('位置情報をコピーしました！');
                 } catch (error) {
-                    alert('現在地のコピーに失敗しました: ' + error.message);
+                    alert('コピーに失敗しました: ' + error.message);
                 }
             } else {
-                alert('現在地が取得されていません！');
+                alert('位置情報が取得されていません！');
             }
         });
 
