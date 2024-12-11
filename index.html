@@ -73,16 +73,15 @@
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
 
-        let currentLocation = '';
-
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    currentLocation = `${latitude},${longitude}`;
+                    const currentLocation = `${latitude},${longitude}`;
                     alert('現在地を取得しました！');
+                    locationInput.value = currentLocation;
                 },
                 (error) => {
                     alert(`位置情報の取得に失敗しました: ${error.message}`);
@@ -91,11 +90,12 @@
         });
 
         // ペーストボタン
-        pasteLocationButton.addEventListener('click', () => {
-            if (currentLocation) {
-                locationInput.value = currentLocation;
-            } else {
-                alert('現在地を先に取得してください！');
+        pasteLocationButton.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                locationInput.value = text;
+            } catch (error) {
+                alert('クリップボードからペーストできませんでした: ' + error.message);
             }
         });
 
