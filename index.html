@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>位置情報簡易設定ツール</title>
+    <script defer src="script.js"></script>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -14,147 +15,86 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: #121212;
-            color: #ffffff;
-            overflow: hidden;
-            position: relative;
-            scroll-behavior: smooth;
+            background-color: #f8f9fa;
         }
 
         header {
             text-align: center;
             margin-bottom: 20px;
-            animation: fadeIn 1.5s ease-in-out;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            color: #ffffff;
-            transition: transform 0.3s ease;
         }
 
         input, button {
             width: 80%;
             padding: 10px;
             margin: 10px 0;
-            border: none;
-            border-radius: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 16px;
-            transition: transform 0.2s, background-color 0.3s, color 0.3s;
         }
 
         button {
-            background-color: #1f1f1f;
-            color: #ffffff;
+            background-color: #007bff;
+            color: white;
+            border: none;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         button:hover {
-            background-color: #333333;
-            transform: translateY(-3px);
-        }
-
-        button:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        input {
-            background-color: #1f1f1f;
-            color: #ffffff;
-            border: 2px solid #333333;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        input::placeholder {
-            color: #777777;
+            background-color: #0056b3;
         }
 
         .output {
             margin-top: 10px;
             word-wrap: break-word;
             font-size: 14px;
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.1);
+            color: #333;
         }
 
-        .glitch {
-            display: inline-block;
-            animation: glitch 1.5s steps(3, end) infinite;
-            font-family: 'Courier New', Courier, monospace;
-            color: #ff0000;
-            font-size: 2rem;
-        }
-
-        @keyframes glitch {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(2px, -2px); }
-            50% { transform: translate(-2px, 2px); }
-            75% { transform: translate(2px, 2px); }
+        @media (max-width: 600px) {
+            input, button {
+                width: 90%;
+            }
         }
     </style>
 </head>
 <body>
-    <header id="header">
-        <h1 id="title">位置情報簡易設定ツール</h1>
-        <p>位置情報ツール</p>
+    <header>
+        <h1>位置情報簡易設定ツール</h1>
+        <p>現在の位置を取得or位置情報から地図PIN刺し</p>
     </header>
-    <button id="getLocation">現在地をチェック</button>
+    <button id="getLocation">現在地を取得</button>
     <input type="text" id="locationDisplay" class="output" placeholder="現在地がここに表示されます" readonly>
-    <button id="copyLocation">位置情報をコピー</button>
-    <button id="pasteLocation">情報をペースト</button>
+    <button id="copyLocation">現在地をコピー</button>
+    <button id="pasteLocation">位置情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
-    <button id="openMap">地図を開く</button>
+    <button id="openMap">Google Mapsで開く</button>
 
     <script>
         const getLocationButton = document.getElementById('getLocation');
-        const title = document.getElementById('title');
-        const locationDisplay = document.getElementById('locationDisplay');
         const copyLocationButton = document.getElementById('copyLocation');
         const pasteLocationButton = document.getElementById('pasteLocation');
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
+        const locationDisplay = document.getElementById('locationDisplay');
 
         let currentLocation = '';
 
-        // 文字化けさせるためのランダムな文字列生成関数
-        function getRandomString() {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
-            let result = '';
-            const length = Math.floor(Math.random() * 10) + 5; // 5〜15文字
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
-            // 文字化け演出
-            title.textContent = getRandomString();
-            document.querySelector('button').textContent = getRandomString();
-
-            // 文字化け後、位置情報取得
-            setTimeout(() => {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        currentLocation = `${latitude},${longitude}`;
-                        locationDisplay.value = currentLocation;
-                        // 元のタイトルに戻す
-                        title.textContent = '位置情報簡易設定ツール'; 
-                    },
-                    (error) => {
-                        locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
-                    }
-                );
-            }, 1000); // 1秒後に位置情報取得
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    currentLocation = ${latitude},${longitude};
+                    locationDisplay.value = ${latitude},${longitude};
+                },
+                (error) => {
+                    locationDisplay.value = 位置情報の取得に失敗しました: ${error.message};
+                }
+            );
         });
 
-        // 位置情報をコピー
+        // 現在地をコピー
         copyLocationButton.addEventListener('click', async () => {
             if (currentLocation) {
                 try {
@@ -182,7 +122,7 @@
         openMapButton.addEventListener('click', () => {
             const input = locationInput.value.trim();
             if (input) {
-                const url = `https://www.google.com/maps?q=${input}`;
+                const url = https://www.google.com/maps?q=${input};
                 window.open(url, '_blank');
             } else {
                 alert('有効な緯度と経度を入力してください');
