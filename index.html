@@ -31,6 +31,7 @@
             font-size: 2rem;
             margin-bottom: 10px;
             color: #ffffff;
+            transition: transform 0.3s ease;
         }
 
         input, button {
@@ -79,48 +80,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ff0000;
-            font-size: 2rem;
-            font-family: 'Courier New', Courier, monospace;
-            text-align: center;
-            z-index: 10;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .overlay.visible {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes glitch {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(2px, -2px); }
-            50% { transform: translate(-2px, 2px); }
-            75% { transform: translate(2px, 2px); }
-        }
-
-        .glitch {
-            display: inline-block;
-            animation: glitch 0.2s steps(2, end) infinite;
-        }
-
         .find-me {
             position: absolute;
             top: 200%;
@@ -142,30 +101,40 @@
             opacity: 0;
         }
 
-        .location-glitch {
+        .glitch {
+            display: inline-block;
+            animation: glitch 1.5s steps(3, end) infinite;
             font-family: 'Courier New', Courier, monospace;
             color: #ff0000;
             font-size: 2rem;
-            animation: glitch 1.5s steps(3, end) infinite;
         }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(2px, -2px); }
+            50% { transform: translate(-2px, 2px); }
+            75% { transform: translate(2px, 2px); }
+        }
+
     </style>
 </head>
 <body>
-    <header>
-        <h1>位置情報簡易設定ツール</h1>
-        <p>位置情報取得or地図Pin刺しツール</p>
+    <header id="header">
+        <h1 id="title">位置情報簡易設定ツール</h1>
+        <p>位置情報ツール</p>
     </header>
-    <div class="overlay" id="overlay">現在地取得中... <span class="glitch">###$$@!!??!!</span></div>
-    <div class="find-me" id="findMe">みつけた...</div>
     <button id="getLocation">現在地をチェック</button>
     <input type="text" id="locationDisplay" class="output" placeholder="現在地がここに表示されます" readonly>
     <button id="copyLocation">位置情報をコピー</button>
     <button id="pasteLocation">情報をペースト</button>
     <input type="text" id="locationInput" placeholder="緯度, 経度を入力">
     <button id="openMap">地図を開く</button>
+    <div class="find-me" id="findMe">みつけた...</div>
+
     <script>
         const getLocationButton = document.getElementById('getLocation');
-        const overlay = document.getElementById('overlay');
+        const title = document.getElementById('title');
+        const header = document.getElementById('header');
         const locationDisplay = document.getElementById('locationDisplay');
         const copyLocationButton = document.getElementById('copyLocation');
         const pasteLocationButton = document.getElementById('pasteLocation');
@@ -175,14 +144,34 @@
 
         let currentLocation = '';
 
+        // 文字化けさせるためのランダムな文字列生成関数
+        function getRandomString() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            let result = '';
+            const length = Math.floor(Math.random() * 10) + 5; // 5〜15文字
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
-            overlay.classList.add('visible');
-            locationDisplay.classList.add('location-glitch');  // 文字化けを発生させる
+            // 文字化け演出
+            title.textContent = getRandomString();
+            document.querySelector('button').textContent = getRandomString();
 
+            // UIを一時的に非表示
+            header.style.display = 'none';
+            getLocationButton.style.display = 'none';
+            locationDisplay.style.display = 'none';
+            copyLocationButton.style.display = 'none';
+            pasteLocationButton.style.display = 'none';
+            locationInput.style.display = 'none';
+            openMapButton.style.display = 'none';
+
+            // 文字化け後、位置情報取得
             setTimeout(() => {
-                overlay.classList.remove('visible');
-                locationDisplay.classList.remove('location-glitch'); // 文字化けを解除
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const latitude = position.coords.latitude;
@@ -194,10 +183,18 @@
                         window.scrollTo(0, document.body.scrollHeight);
                         findMe.classList.add('visible');
 
-                        // 一定時間後に戻す
+                        // 一定時間後に元に戻す
                         setTimeout(() => {
                             findMe.classList.remove('visible');
                             window.scrollTo(0, 0);  // ページを元に戻す
+                            title.textContent = '位置情報簡易設定ツール'; // 元の文字に戻す
+                            header.style.display = 'block';
+                            getLocationButton.style.display = 'inline-block';
+                            locationDisplay.style.display = 'inline-block';
+                            copyLocationButton.style.display = 'inline-block';
+                            pasteLocationButton.style.display = 'inline-block';
+                            locationInput.style.display = 'inline-block';
+                            openMapButton.style.display = 'inline-block';
                         }, 3000);
                     },
                     (error) => {
@@ -207,7 +204,7 @@
             }, 1000);
         });
 
-        // 現在地をコピー
+        // 位置情報をコピー
         copyLocationButton.addEventListener('click', async () => {
             if (currentLocation) {
                 try {
