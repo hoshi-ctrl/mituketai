@@ -18,6 +18,7 @@
             color: #ffffff;
             overflow: hidden;
             position: relative;
+            scroll-behavior: smooth;
         }
 
         header {
@@ -140,12 +141,19 @@
         .find-me.hidden {
             opacity: 0;
         }
+
+        .location-glitch {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff0000;
+            font-size: 2rem;
+            animation: glitch 1.5s steps(3, end) infinite;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>位置情報簡易設定ツール</h1>
-        <p>位置情報取得or地図PIN刺しツール</p>
+        <p>位置情報取得or地図Pin刺しツール</p>
     </header>
     <div class="overlay" id="overlay">現在地取得中... <span class="glitch">###$$@!!??!!</span></div>
     <div class="find-me" id="findMe">みつけた...</div>
@@ -158,33 +166,38 @@
     <script>
         const getLocationButton = document.getElementById('getLocation');
         const overlay = document.getElementById('overlay');
-        const findMe = document.getElementById('findMe');
         const locationDisplay = document.getElementById('locationDisplay');
         const copyLocationButton = document.getElementById('copyLocation');
         const pasteLocationButton = document.getElementById('pasteLocation');
         const locationInput = document.getElementById('locationInput');
         const openMapButton = document.getElementById('openMap');
+        const findMe = document.getElementById('findMe');
 
         let currentLocation = '';
 
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
             overlay.classList.add('visible');
+            locationDisplay.classList.add('location-glitch');  // 文字化けを発生させる
 
             setTimeout(() => {
                 overlay.classList.remove('visible');
+                locationDisplay.classList.remove('location-glitch'); // 文字化けを解除
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const latitude = position.coords.latitude;
                         const longitude = position.coords.longitude;
                         currentLocation = `${latitude},${longitude}`;
                         locationDisplay.value = currentLocation;
-                        
-                        // Show "みつけた" effect
+
+                        // スクロールし、「みつけた」を表示
+                        window.scrollTo(0, document.body.scrollHeight);
                         findMe.classList.add('visible');
 
+                        // 一定時間後に戻す
                         setTimeout(() => {
                             findMe.classList.remove('visible');
+                            window.scrollTo(0, 0);  // ページを元に戻す
                         }, 3000);
                     },
                     (error) => {
