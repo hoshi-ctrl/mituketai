@@ -41,6 +41,8 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        let myLocation = null;
+        let otherLocation = null;
         const markers = [];
 
         function shareLocation() {
@@ -52,6 +54,9 @@
                     // 位置情報をテキストエリアに表示
                     const locationText = `緯度: ${lat}, 経度: ${lng}`;
                     document.getElementById('locationText').value = locationText;
+                    
+                    // 自分の位置情報を保存
+                    myLocation = { lat, lng };
                 });
             } else {
                 alert('位置情報が利用できません');
@@ -79,15 +84,41 @@
                 const lat = parseFloat(latMatch[1]);
                 const lng = parseFloat(lngMatch[1]);
 
-                // 新しいマーカーを追加
-                const marker = L.marker([lat, lng])
-                    .bindPopup(`緯度: ${lat}, 経度: ${lng}`)
-                    .addTo(map);
-                
-                markers.push(marker);
+                // 相手の位置情報を保存
+                otherLocation = { lat, lng };
 
-                // マップを更新
-                map.setView([lat, lng], 10);
+                // 自分の位置情報があれば追加
+                if (myLocation) {
+                    // 自分のマーカー
+                    const myMarker = L.marker([myLocation.lat, myLocation.lng], {
+                        icon: L.divIcon({
+                            className: 'my-marker',
+                            html: '<div style="background-color: blue; width: 10px; height: 10px; border-radius: 50%;"></div>'
+                        })
+                    })
+                    .bindPopup('自分の位置')
+                    .addTo(map);
+                    markers.push(myMarker);
+                }
+
+                // 相手のマーカー
+                const otherMarker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'other-marker',
+                        html: '<div style="background-color: red; width: 10px; height: 10px; border-radius: 50%;"></div>'
+                    })
+                })
+                .bindPopup('相手の位置')
+                .addTo(map);
+                markers.push(otherMarker);
+
+                // 両者の位置を含むようにマップを調整
+                if (myLocation) {
+                    const bounds = L.latLngBounds([myLocation.lat, myLocation.lng], [lat, lng]);
+                    map.fitBounds(bounds);
+                } else {
+                    map.setView([lat, lng], 10);
+                }
             } else {
                 alert('有効な位置情報形式ではありません');
             }
