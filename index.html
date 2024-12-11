@@ -77,14 +77,15 @@
         const openMapButton = document.getElementById('openMap');
         const locationDisplay = document.getElementById('locationDisplay');
 
+        let currentLocation = '';
+
         // 現在地を取得
         getLocationButton.addEventListener('click', () => {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    const currentLocation = `${latitude},${longitude}`;
-                    locationInput.value = currentLocation;
+                    currentLocation = `${latitude},${longitude}`;
                     locationDisplay.value = `緯度: ${latitude}, 経度: ${longitude}`;
                 },
                 (error) => {
@@ -95,16 +96,15 @@
 
         // 現在地をコピー
         copyLocationButton.addEventListener('click', async () => {
-            try {
-                const text = locationDisplay.value;
-                if (text) {
-                    await navigator.clipboard.writeText(text);
-                    alert('現在地をコピーしました');
-                } else {
-                    alert('現在地が取得されていません');
+            if (currentLocation) {
+                try {
+                    await navigator.clipboard.writeText(currentLocation);
+                    alert('現在地をコピーしました！');
+                } catch (error) {
+                    alert('現在地のコピーに失敗しました: ' + error.message);
                 }
-            } catch (error) {
-                alert('コピーに失敗しました: ' + error.message);
+            } else {
+                alert('現在地が取得されていません！');
             }
         });
 
