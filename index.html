@@ -86,7 +86,7 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     currentLocation = `${latitude},${longitude}`;
-                    locationDisplay.value = `緯度: ${latitude}, 経度: ${longitude}`;
+                    locationDisplay.value = `${latitude},${longitude}`;
                 },
                 (error) => {
                     locationDisplay.value = `位置情報の取得に失敗しました: ${error.message}`;
